@@ -1,3 +1,25 @@
+!**************************************************************************************
+!    Copyright 2016 Holger Kruse                                                      *
+!                                                                                     *
+!    This file is part of solvate.                                                    *
+!                                                                                     *
+!    solvate is free software: you can redistribute it and/or modify                  *
+!    it under the terms of the GNU Lesser General Public License as published by      *
+!    the Free Software Foundation, either version 3 of the License, or                *
+!    (at your option) any later version.                                              *
+!                                                                                     *
+!    solvate is distributed in the hope that it will be useful,                       *
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of                   *
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                    *
+!    GNU Lesser General Public License for more details.                              *
+!                                                                                     *
+!    You should have received a copy of the GNU Lesser General Public License         *
+!    along with solvate.  If not, see <http://www.gnu.org/licenses/>.                 *
+!                                                                                     *
+!                                                                                     *
+!  Feel free to contact me: Holger Kruse (mail2holger@gmail.com)                      *
+!                                                                                     *
+!**************************************************************************************
 Pure Function to_upper (str) Result (string)
 
 !   ==============================

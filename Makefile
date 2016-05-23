@@ -4,9 +4,13 @@
   OBJS=modules.o solvate.o random.o wpack.o string.o read_options.o molecule.o
 
   FC = gfortran 
-  LINK =  -static
+  LINK =  -static -fopenmp
   FLAGS= -O3 -ffree-line-length-none -m64  
 
+
+#  any blas/lapack will do
+#  OPENBLAS=/usr/qc/openblas
+#  LIBS= -L$(OPENBLAS) -lopenblas 
 
   LIBS=-L/usr/lib64 -llapack -lblas
 

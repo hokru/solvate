@@ -1,6 +1,6 @@
 # README #
 
-Solvate <xyz file> <buffer size in A>
+usage "Solvate <xyz file> <buffer size in A>"
 
 ### What? ###
 
@@ -10,7 +10,7 @@ Solvate <xyz file> <buffer size in A>
 
 ### How ? ###
 
-* clone & compile & run
+* clone - compile - run
 * gfortran tested
 
 ### Contribution guidelines ###
