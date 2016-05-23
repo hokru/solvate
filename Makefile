@@ -29,4 +29,4 @@ clean:
 
 tar:
 	rm -f solv.tgz
-	tar -cvzf solv.tgz Makefile *.f90
+	tar -cvzf solv.tgz Makefile *.f90 README.md LICENSE.md database
