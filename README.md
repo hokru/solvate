@@ -1,17 +1,19 @@
 # README #
 
-usage "Solvate <xyz file> <buffer size in A>"
+usage `Solvate <xyz file> [-options]`
 
 ### What? ###
 
 * prepares a packmol input
 * outputs celll data
-
+* build-in solvents
+* read solvents
+* center-of-mass trafo
 
 ### How ? ###
 
 * clone - compile - run
-* gfortran tested
+* `-h` prints help
 
 ### Contribution guidelines ###
 
