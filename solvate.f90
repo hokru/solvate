@@ -20,6 +20,10 @@
 !  Feel free to contact me: Holger Kruse (mail2holger@gmail.com)                      *
 !                                                                                     *
 !**************************************************************************************
+
+
+
+
 !*************************************************
 !* usage: Solvate <molecule> <buffer size>       *
 !*                                               *
@@ -47,7 +51,7 @@ integer nat,i,j,k,l
 integer, allocatable :: iat(:)
 
 real(8) xmax(2),ymax(2),zmax(2),xmin(2),ymin(2),zmin(2),cell(3),vol,bohr,vander(100)
-real(8) cmax(3),cmin(3)
+real(8) cmax(3),cmin(3),cellvdw(3)
 real(8), allocatable :: xyz(:,:)
 
 real(8) mass,nwat,molvol
@@ -181,16 +185,27 @@ print*, ' est. V(solute) / A^3= ',molvol
 print*,''
 print*,''
 
+print*,''
+print*,'INFO: using vdW buffer region to calculate number of solvents'
+print*,''
 
 print*,'******  minimal buffer BOX **********'
 ! add buffer region
 cell(1)=xmax(1)-xmin(1)+buffer*2
 cell(2)=ymax(1)-ymin(1)+buffer*2
 cell(3)=zmax(1)-zmin(1)+buffer*2
+cellvdw(1)=cell(1)+vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))
+cellvdw(2)=cell(2)+vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))
+cellvdw(3)=cell(3)+vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))
+
 vol=cell(1)*cell(2)*cell(3)
 print*,' Buffer to each side: ', buffer
 write(*,'(a,3F8.2)') ' cell / A   : ',cell(1:3)
 print *,'vol(+buffer)  / A^3 : ',vol
+!print*, 'vol for water / A^3= ',vol-molvol
+write(*,'(a,3F8.2)') ' cell+vdW / A   : ',cellvdw(1:3)
+vol=cellvdw(1)*cellvdw(2)*cellvdw(3)
+print *,'vol(+buffer+vdW)  / A^3 : ',vol
 print*, 'vol for water / A^3= ',vol-molvol
 
 call solvent_read(solvfile,smass,svol)
@@ -199,39 +214,88 @@ print '(a,2x,I5)',' --> number of integer waters needed:', nint(nwat)
 print '(a,2x,F7.3)', 'effective water density [g/mL]   : ', (nint(nwat)*smass)/(vol-molvol)/0.602
 print '(a,2x,F7.3)', 'effective liquid density [g/mL  ]: ', (nint(nwat)*smass+mass)/vol/0.602
 print*,'****************************'
-call wpack(cell,int(nwat),trim(infile),'')
+call wpack(cell,int(nwat),trim(infile),'') ! exlcude vdW region from packmol input
+
+
+!*******************************************************************************************************
+
+
 
 print*,''
-print*,'******  equal size box **********'
+print*,''
+print*,''
+
+print*,'******  equal size BOX **********'
+! add buffer region
+!cell(1)=xmax(1)-xmin(1)+buffer*2
+!cell(2)=ymax(1)-ymin(1)+buffer*2
+!cell(3)=zmax(1)-zmin(1)+buffer*2
+!cellvdw(1)=xmax(1)-xmin(1)+buffer*2+vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))
+!cellvdw(2)=ymax(1)-ymin(1)+buffer*2+vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))
+!cellvdw(2)=zmax(1)-zmin(1)+buffer*2+vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))
 cell=maxval(cell)
-!cell=vol
+cellvdw=maxval(cellvdw)
 vol=cell(1)*cell(2)*cell(3)
+print*,' Buffer to each side: ', buffer
 write(*,'(a,3F8.2)') ' cell / A   : ',cell(1:3)
 print *,'vol(+buffer)  / A^3 : ',vol
+!print*, 'vol for water / A^3= ',vol-molvol
+write(*,'(a,3F8.2)') ' cell+vdW / A   : ',cellvdw(1:3)
+vol=cellvdw(1)*cellvdw(2)*cellvdw(3)
+print *,'vol(+buffer+vdW)  / A^3 : ',vol
+print*, 'vol for water / A^3= ',vol-molvol
 
+!call solvent_read(solvfile,smass,svol)
 nwat=(p*0.602*vol-molvol)/smass
-print '(a,2x,F7.1)',' --> number of waters needed:', nwat
-
-call wpack(cell,int(nwat),trim(infile),'cube')
+print '(a,2x,I5)',' --> number of integer waters needed:', nint(nwat)
+print '(a,2x,F7.3)', 'effective water density [g/mL]   : ', (nint(nwat)*smass)/(vol-molvol)/0.602
+print '(a,2x,F7.3)', 'effective liquid density [g/mL  ]: ', (nint(nwat)*smass+mass)/vol/0.602
 print*,'****************************'
-
-print*,'******  vdW buffer size **********'
-cell(1)=vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))
-cell(2)=vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))
-cell(3)=vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))
-write(*,'(a,3F8.2)') '  / A^3   : ',cell(1:3)
-print*,'****************************'
-
-print*, 'Suggested simulation box (buffer+vdw) '
-cell(1)=xmax(1)-xmin(1)+vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))+buffer*2
-cell(2)=ymax(1)-ymin(1)+vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))+buffer*2
-cell(3)=zmax(1)-zmin(1)+vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))+buffer*2
-write(*,'(a,3F8.2)') ' minimal / A^3   : ',cell(1:3)
-cell=maxval(cell)
-write(*,'(a,3F8.2)') ' cube / A^3   : ',cell(1:3)
+call wpack(cell,int(nwat),trim(infile),'cube') ! exlcude vdW region from packmol input
 
 
-print*,''
+
+
+!  print*,''
+!  print*,'******  equal size box **********'
+!  cell=maxval(cell)
+!  write(*,'(a,3F8.2)') ' cell / A   : ',cell(1:3)
+!  cell(1)=xmax(1)-xmin(1)+vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))+buffer*2
+!  cell(2)=ymax(1)-ymin(1)+vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))+buffer*2
+!  cell(3)=zmax(1)-zmin(1)+vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))+buffer*2
+!  cell=maxval(cell)
+!  !cell=vol
+!  vol=cell(1)*cell(2)*cell(3)
+!  write(*,'(a,3F8.2)') ' cell+vdw / A   : ',cell(1:3)
+!  !print *,'vol(+buffer)  / A^3 : ',vol
+!  print *,'vol(+buffer+vdw)  / A^3 : ',vol
+!  nwat=(p*0.602*vol-molvol)/smass
+!  print '(a,2x,I5)',' --> number of integer waters needed:', nint(nwat)
+!  ! pack water in normal cell
+!  cell=cmax-cmin+buffer*2
+!  cell=maxval(cell)
+!  call wpack(cell,int(nwat),trim(infile),'cube')
+!  print*,'****************************'
+! 
+!  print*,'******  vdW buffer size **********'
+!  cell(1)=vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))
+!  cell(2)=vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))
+!  cell(3)=vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))
+!  write(*,'(a,3F8.2)') '  / A^3   : ',cell(1:3)
+!  print*,'****************************'
+! 
+!  print*, 'Suggested simulation box (buffer+vdw) '
+!  cell(1)=xmax(1)-xmin(1)+vander(iat(int(xmax(2))))+vander(iat(int(xmin(2))))+buffer*2
+!  cell(2)=ymax(1)-ymin(1)+vander(iat(int(ymax(2))))+vander(iat(int(ymin(2))))+buffer*2
+!  cell(3)=zmax(1)-zmin(1)+vander(iat(int(zmax(2))))+vander(iat(int(zmin(2))))+buffer*2
+!  write(*,'(a,3F8.2)') ' minimal / A^3   : ',cell(1:3)
+!  cell=maxval(cell)
+!  write(*,'(a,3F8.2)') ' cube / A^3   : ',cell(1:3)
+! 
+
+  print*,''
+  print*,''
+  print*,''
 
 
 
